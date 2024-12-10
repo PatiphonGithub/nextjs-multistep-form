@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -79,21 +80,13 @@ export default function SignatureForm({
   return (
     <>
       {/* Buttons for drawing or uploading a signature */}
-      <div className="flex flex-col space-y-4 max-w-md">
-        <Dialog open={isOpenDraw} onOpenChange={setIsOpenDraw}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Pen className="h-4 w-4" />
-              Open Signature Pad
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px]">
-            <DialogHeader>
-              <DialogTitle>Sign Here</DialogTitle>
-            </DialogHeader>
-            <SignaturePad onSave={handleSave} onClose={handleDrawClose} />
-          </DialogContent>
-        </Dialog>
+      <div className="flex flex-col space-y-4">
+        <SignaturePad
+          onSave={handleSave}
+          onClose={handleDrawClose}
+          isOpenDraw={isOpenDraw}
+          setIsOpenDraw={setIsOpenDraw}
+        />
 
         <Dialog open={isOpenCrop} onOpenChange={setIsOpenCrop}>
           <DialogTrigger asChild>
@@ -102,7 +95,7 @@ export default function SignatureForm({
               Upload Signature
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px]">
+          <DialogContent className="sm:max-w-[550px] overscroll-auto">
             <DialogHeader>
               <DialogTitle>Upload Image</DialogTitle>
             </DialogHeader>
@@ -135,6 +128,16 @@ interface SignaturePadProps {
    * Callback function to close the signature pad.
    */
   onClose: () => void;
+
+  /**
+   * Whether the signature pad is open.
+   */
+  isOpenDraw: boolean;
+
+  /**
+   * Function to set the signature pad open state.
+   */
+  setIsOpenDraw: (isOpen: boolean) => void;
 }
 
 /**
@@ -144,7 +147,12 @@ interface SignaturePadProps {
  * @param onSave - Callback to save the signature as a base64 string.
  * @param onClose - Callback to close the signature pad.
  */
-export function SignaturePad({ onSave, onClose }: SignaturePadProps) {
+export function SignaturePad({
+  onSave,
+  onClose,
+  isOpenDraw,
+  setIsOpenDraw,
+}: SignaturePadProps) {
   const signatureCanvas = useRef<ReactSignatureCanvas>(null); // Reference to the signature canvas
   const [isEmpty, setIsEmpty] = useState(true); // State to track if the canvas is empty
 
@@ -176,38 +184,54 @@ export function SignaturePad({ onSave, onClose }: SignaturePadProps) {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      {/* Canvas for drawing the signature */}
-      <div className="relative border border-input rounded-md overflow-hidden">
-        {isEmpty && (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-            Sign here...
+    <Dialog open={isOpenDraw} onOpenChange={setIsOpenDraw}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <Pen className="h-4 w-4" />
+          Open Signature Pad
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[550px]">
+        <DialogHeader>
+          <DialogTitle>Sign Here</DialogTitle>
+        </DialogHeader>
+
+        <DialogFooter>
+          <div className="flex flex-col items-center space-y-4">
+            {/* Canvas for drawing the signature */}
+            <div className="relative border border-input rounded-md overflow-hidden">
+              {isEmpty && (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                  Sign here...
+                </div>
+              )}
+              <SignatureCanvas
+                ref={signatureCanvas}
+                onBegin={handleDrawStart}
+                canvasProps={{
+                  className: "relative z-10",
+                  width: 500,
+                  height: 250,
+                }}
+              />
+            </div>
+            {/* Buttons for clearing, saving, or canceling */}
+            <div className="flex space-x-2 flex-col sm:flex-row">
+              <Button onClick={clear} variant="outline" className="gap-2">
+                <RiResetLeftFill className="h-4 w-4" />
+                Clear
+              </Button>
+              <Button onClick={save} className="gap-2">
+                <FaSave className="w-4 h-4" />
+                Save
+              </Button>
+              <Button onClick={onClose} variant="ghost">
+                Cancel
+              </Button>
+            </div>
           </div>
-        )}
-        <SignatureCanvas
-          ref={signatureCanvas}
-          onBegin={handleDrawStart}
-          canvasProps={{
-            className: "relative z-10",
-            width: 500,
-            height: 250,
-          }}
-        />
-      </div>
-      {/* Buttons for clearing, saving, or canceling */}
-      <div className="flex space-x-2">
-        <Button onClick={clear} variant="outline" className="gap-2">
-          <RiResetLeftFill className="h-4 w-4" />
-          Clear
-        </Button>
-        <Button onClick={save} className="gap-2">
-          <FaSave className="w-4 h-4" />
-          Save
-        </Button>
-        <Button onClick={onClose} variant="ghost">
-          Cancel
-        </Button>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -91,6 +91,7 @@ export function ImageCropper({
     // Generate cropped image as base64
     const base64Image = canvas.toDataURL("image/jpeg");
     onCrop(base64Image);
+    onClose();
   };
 
   /**
@@ -175,13 +176,15 @@ export function ImageCropper({
 
       {/* Image Cropper */}
       {src && (
-        <ReactCrop
-          crop={cropVariable}
-          onChange={(newCrop) => setCropVariable(newCrop)}
-          aspect={16 / 9}
-        >
-          <img src={src} alt="" ref={imgRef} />
-        </ReactCrop>
+        <div className="max-w-[500px] max-h-[400px] overflow-auto">
+          <ReactCrop
+            crop={cropVariable}
+            onChange={(newCrop) => setCropVariable(newCrop)}
+            aspect={16 / 9}
+          >
+            <img src={src} alt="" ref={imgRef} className="w-full h-full" />
+          </ReactCrop>
+        </div>
       )}
     </div>
   );
