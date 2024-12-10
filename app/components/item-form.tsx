@@ -48,7 +48,7 @@ interface ItemFormProps {
  * @param onItemsChange - Callback to update the items array.
  */
 export default function ItemForm({ items, onItemsChange }: ItemFormProps) {
-  const [nextId, setNextId] = useState(items.length + 1); // Tracks the next unique ID for new items
+  const [nextId, setNextId] = useState(items.length + 1); 
 
   /**
    * Adds a new item with default values.
